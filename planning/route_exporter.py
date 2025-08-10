@@ -165,7 +165,7 @@ class RouteExporter:
                           output_file: str,
                           route_name: str = "StreetView Route") -> None:
         """
-        Export route to GeoJSON format.
+        Export route to GeoJSON format with street geometry.
         
         Args:
             route: List of edge tuples (node_from, node_to)
@@ -174,28 +174,94 @@ class RouteExporter:
         """
         logger.info(f"Exporting route to GeoJSON: {output_file}")
         
-        # Build coordinate list
+        # Check if graph is projected and create transformer if needed
+        crs = self.graph.graph.get('crs', 'EPSG:4326')
+        transformer = None
+        if crs != 'EPSG:4326' and crs != 'epsg:4326':
+            from pyproj import Transformer
+            transformer = Transformer.from_crs(crs, 'EPSG:4326', always_xy=True)
+            logger.info(f"Graph is projected ({crs}), will transform coordinates to lat/lon")
+        
+        # Build coordinate list using street geometry
         coordinates = []
-        added_nodes = set()
+        last_node = None
         
         for u, v in route:
-            # Add starting node
-            if u not in added_nodes:
-                node_data = self.graph.nodes[u]
-                lat = node_data.get('lat', node_data.get('y'))
-                lon = node_data.get('lon', node_data.get('x'))
-                if lat and lon:
-                    coordinates.append([lon, lat])
-                    added_nodes.add(u)
+            # Try to get edge geometry for actual street path
+            if self.graph.has_edge(u, v):
+                edge_data = self.graph[u][v]
+                # Handle multi-edge case
+                if isinstance(edge_data, dict) and 'geometry' in edge_data:
+                    geometry = edge_data['geometry']
+                else:
+                    # Try to find an edge with geometry
+                    geometry = None
+                    for key in edge_data:
+                        if 'geometry' in edge_data[key]:
+                            geometry = edge_data[key]['geometry']
+                            break
+                
+                # If we have geometry, use it
+                if geometry:
+                    try:
+                        # Get coordinates from the geometry
+                        edge_coords = list(geometry.coords)
+                        
+                        # Transform coordinates if graph is projected
+                        if transformer:
+                            transformed_coords = []
+                            for x, y in edge_coords:
+                                lon, lat = transformer.transform(x, y)
+                                transformed_coords.append((lon, lat))
+                            edge_coords = transformed_coords
+                        
+                        # Skip first point if it's the same as last point (avoid duplicates)
+                        if coordinates and len(edge_coords) > 0:
+                            last_point = coordinates[-1]
+                            first_point = [edge_coords[0][0], edge_coords[0][1]]
+                            if abs(last_point[0] - first_point[0]) < 0.000001 and abs(last_point[1] - first_point[1]) < 0.000001:
+                                edge_coords = edge_coords[1:]
+                        
+                        # Add all points from the geometry
+                        for lon, lat in edge_coords:
+                            coordinates.append([lon, lat])
+                        continue
+                    except Exception as e:
+                        logger.debug(f"Could not extract geometry for edge {u}->{v}: {e}")
             
-            # Add ending node
-            if v not in added_nodes:
-                node_data = self.graph.nodes[v]
+            # Fallback: use node coordinates if no geometry available
+            if last_node != u:
+                node_data = self.graph.nodes[u]
+                if transformer:
+                    # Graph is projected, use x/y and transform
+                    x = node_data.get('x')
+                    y = node_data.get('y')
+                    if x is not None and y is not None:
+                        lon, lat = transformer.transform(x, y)
+                        coordinates.append([lon, lat])
+                else:
+                    # Graph is not projected, use lat/lon directly
+                    lat = node_data.get('lat', node_data.get('y'))
+                    lon = node_data.get('lon', node_data.get('x'))
+                    if lat and lon:
+                        coordinates.append([lon, lat])
+            
+            node_data = self.graph.nodes[v]
+            if transformer:
+                # Graph is projected, use x/y and transform
+                x = node_data.get('x')
+                y = node_data.get('y')
+                if x is not None and y is not None:
+                    lon, lat = transformer.transform(x, y)
+                    coordinates.append([lon, lat])
+            else:
+                # Graph is not projected, use lat/lon directly
                 lat = node_data.get('lat', node_data.get('y'))
                 lon = node_data.get('lon', node_data.get('x'))
                 if lat and lon:
                     coordinates.append([lon, lat])
-                    added_nodes.add(v)
+            
+            last_node = v
         
         # Create GeoJSON structure
         geojson = {
