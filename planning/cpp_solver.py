@@ -1,18 +1,20 @@
 """
-Chinese Postman Problem solver for finding optimal routes that cover all streets.
+Optimized Chinese Postman Problem solver using the postman_problems library.
 """
 
 import networkx as nx
-from itertools import combinations
+import pandas as pd
 import logging
-from typing import List, Tuple, Set, Dict
+from typing import List, Tuple, Dict
+import tempfile
+import os
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 class CPPSolver:
-    """Solves the Chinese Postman Problem for street coverage."""
+    """Solves the Chinese Postman Problem using the postman_problems library."""
     
     def __init__(self, graph: nx.MultiDiGraph):
         """
@@ -27,200 +29,91 @@ class CPPSolver:
         
     def solve(self) -> List[Tuple[int, int]]:
         """
-        Solve the Chinese Postman Problem.
+        Solve the Chinese Postman Problem using the postman_problems library.
         
         Returns:
             List of edges representing the optimal tour
         """
-        logger.info("Starting Chinese Postman Problem solution")
+        logger.info("Starting optimized Chinese Postman Problem solution")
         
-        # Check if graph is already Eulerian
-        if self._is_eulerian():
-            logger.info("Graph is already Eulerian")
-            self.augmented_graph = self.graph.copy()
-        else:
-            logger.info("Graph is not Eulerian, augmenting...")
-            self._augment_graph()
+        # Convert graph to edge list DataFrame
+        edge_list = self._graph_to_edgelist()
         
-        # Find Euler circuit
-        self.euler_circuit = self._find_euler_circuit()
-        logger.info(f"Found Euler circuit with {len(self.euler_circuit)} edges")
+        # Create temporary CSV file for the solver
+        # (The library requires a file path, we'll use a temp file)
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
+            temp_path = f.name
+            edge_list.to_csv(f, index=False)
         
-        return self.euler_circuit
-    
-    def _is_eulerian(self) -> bool:
-        """
-        Check if the graph is Eulerian (all vertices have even degree).
-        
-        Returns:
-            True if graph is Eulerian, False otherwise
-        """
-        # For directed graphs, check if in-degree equals out-degree for all nodes
-        for node in self.graph.nodes():
-            if self.graph.in_degree(node) != self.graph.out_degree(node):
-                return False
-        
-        # Also check if graph is strongly connected
-        return nx.is_strongly_connected(self.graph)
-    
-    def _get_odd_degree_nodes(self) -> Set[int]:
-        """
-        Find all nodes with odd total degree.
-        
-        Returns:
-            Set of node IDs with odd degree
-        """
-        odd_nodes = set()
-        for node in self.graph.nodes():
-            total_degree = self.graph.in_degree(node) + self.graph.out_degree(node)
-            if total_degree % 2 == 1:
-                odd_nodes.add(node)
-        return odd_nodes
-    
-    def _augment_graph(self):
-        """
-        Augment the graph to make it Eulerian by adding minimum weight edges.
-        """
-        # For simplicity, convert to undirected for finding odd nodes
-        undirected = self.graph.to_undirected()
-        
-        # Find odd degree nodes
-        odd_nodes = []
-        for node in undirected.nodes():
-            if undirected.degree(node) % 2 == 1:
-                odd_nodes.append(node)
-        
-        logger.info(f"Found {len(odd_nodes)} odd-degree nodes")
-        
-        if not odd_nodes:
-            self.augmented_graph = self.graph.copy()
-            return
-        
-        # Find minimum weight matching of odd nodes
-        min_weight_pairs = self._find_min_weight_matching(odd_nodes)
-        
-        # Add duplicate edges to make graph Eulerian
-        self.augmented_graph = self.graph.copy()
-        for node1, node2, path in min_weight_pairs:
-            # Add edges along the shortest path
-            for i in range(len(path) - 1):
-                u, v = path[i], path[i + 1]
-                # Find the edge data from original graph
-                if self.graph.has_edge(u, v):
-                    edge_data = self.graph[u][v][0]  # Get first edge if multiple
-                    self.augmented_graph.add_edge(u, v, **edge_data)
-                elif self.graph.has_edge(v, u):
-                    edge_data = self.graph[v][u][0]
-                    self.augmented_graph.add_edge(v, u, **edge_data)
-        
-        logger.info(f"Added {len(min_weight_pairs)} edge pairs to augment graph")
-    
-    def _find_min_weight_matching(self, odd_nodes: List[int]) -> List[Tuple]:
-        """
-        Find minimum weight perfect matching of odd degree nodes.
-        
-        Args:
-            odd_nodes: List of nodes with odd degree
-            
-        Returns:
-            List of (node1, node2, path) tuples for minimum weight matching
-        """
-        # Compute shortest paths between all pairs of odd nodes
-        odd_node_pairs = list(combinations(odd_nodes, 2))
-        
-        # Create complete graph of odd nodes with shortest path weights
-        complete_graph = nx.Graph()
-        for node1, node2 in odd_node_pairs:
-            try:
-                # Use undirected graph for shortest path
-                undirected = self.graph.to_undirected()
-                path = nx.shortest_path(undirected, node1, node2, weight='length')
-                path_length = nx.shortest_path_length(undirected, node1, node2, weight='length')
-                complete_graph.add_edge(node1, node2, weight=path_length, path=path)
-            except nx.NetworkXNoPath:
-                logger.warning(f"No path found between {node1} and {node2}")
-                continue
-        
-        # Find minimum weight perfect matching
-        matching = nx.algorithms.matching.min_weight_matching(complete_graph, weight='weight')
-        
-        # Extract paths for matched pairs
-        matched_paths = []
-        for node1, node2 in matching:
-            path = complete_graph[node1][node2]['path']
-            matched_paths.append((node1, node2, path))
-        
-        return matched_paths
-    
-    def _find_euler_circuit(self) -> List[Tuple[int, int]]:
-        """
-        Find an Euler circuit in the augmented graph.
-        
-        Returns:
-            List of edges forming the Euler circuit
-        """
-        # Convert to undirected for Eulerian circuit finding
-        undirected = self.augmented_graph.to_undirected(as_view=False)
-        
-        # Ensure graph is connected
-        if not nx.is_connected(undirected):
-            # Find the largest connected component
-            largest_cc = max(nx.connected_components(undirected), key=len)
-            undirected = undirected.subgraph(largest_cc).copy()
-            logger.warning("Graph not connected, using largest connected component")
-        
-        # Find Eulerian circuit
         try:
-            euler_circuit = list(nx.eulerian_circuit(undirected))
-            return euler_circuit
-        except:
-            logger.warning("Could not find Euler circuit, returning approximation")
-            # Return edges in DFS order as approximation
-            edges = []
-            visited = set()
+            # Import here to avoid issues if not installed
+            from postman_problems.solver import cpp
             
-            def dfs(node):
-                visited.add(node)
-                for neighbor in undirected.neighbors(node):
-                    if neighbor not in visited:
-                        edges.append((node, neighbor))
-                        dfs(neighbor)
+            # Solve the CPP
+            logger.info(f"Solving CPP with {len(edge_list)} edges...")
+            circuit, augmented_graph = cpp(temp_path, edge_weight='distance')
             
-            start_node = list(undirected.nodes())[0]
-            dfs(start_node)
-            return edges
+            # Store the augmented graph for stats calculation
+            self.augmented_graph = augmented_graph
+            
+            # Convert circuit to list of edge tuples
+            # The circuit contains edge data with 'node_from' and 'node_to'
+            # Convert node IDs back to integers if they were originally integers
+            try:
+                # Check if original graph has integer node IDs
+                sample_node = next(iter(self.graph.nodes()))
+                if isinstance(sample_node, int):
+                    self.euler_circuit = [(int(edge[0]), int(edge[1])) for edge in circuit]
+                else:
+                    self.euler_circuit = [(edge[0], edge[1]) for edge in circuit]
+            except (ValueError, StopIteration):
+                # Fallback to string IDs if conversion fails
+                self.euler_circuit = [(edge[0], edge[1]) for edge in circuit]
+            logger.info(f"Found Euler circuit with {len(self.euler_circuit)} edges")
+            
+            return self.euler_circuit
+            
+        except Exception as e:
+            logger.error(f"Error solving CPP: {e}")
+            raise
+        finally:
+            # Clean up temp file
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
     
-    def get_total_distance(self) -> float:
+    def _graph_to_edgelist(self) -> pd.DataFrame:
         """
-        Calculate total distance of the route.
+        Convert NetworkX graph to edge list DataFrame format expected by postman_problems.
         
         Returns:
-            Total distance in meters (or graph units)
+            DataFrame with columns: node_from, node_to, distance, and other edge attributes
         """
-        if not self.euler_circuit:
-            return 0
+        edges = []
         
-        total_distance = 0
-        for u, v in self.euler_circuit:
-            if self.augmented_graph.has_edge(u, v):
-                edge_data = self.augmented_graph[u][v]
-                if isinstance(edge_data, dict) and 'length' in edge_data:
-                    total_distance += edge_data['length']
-                else:
-                    # Handle multiple edges
-                    total_distance += edge_data[0].get('length', 0)
-            elif self.augmented_graph.has_edge(v, u):
-                edge_data = self.augmented_graph[v][u]
-                if isinstance(edge_data, dict) and 'length' in edge_data:
-                    total_distance += edge_data['length']
-                else:
-                    total_distance += edge_data[0].get('length', 0)
+        # Handle MultiDiGraph - may have multiple edges between nodes
+        for u, v, key, data in self.graph.edges(keys=True, data=True):
+            edge_data = {
+                'node_from': u,
+                'node_to': v,
+                'distance': data.get('length', 1.0),  # Use 'distance' column name expected by library
+                'length': data.get('length', 1.0)  # Keep length for compatibility
+            }
+            
+            # Add other relevant attributes
+            for attr in ['name', 'highway', 'oneway']:
+                if attr in data:
+                    edge_data[attr] = data[attr]
+            
+            edges.append(edge_data)
         
-        return total_distance
+        df = pd.DataFrame(edges)
+        logger.info(f"Converted graph to edge list with {len(df)} edges")
+        
+        return df
     
-    def get_route_stats(self) -> Dict:
+    def get_route_stats(self) -> dict:
         """
-        Get statistics about the solved route.
+        Get statistics about the planned route.
         
         Returns:
             Dictionary with route statistics
@@ -228,15 +121,64 @@ class CPPSolver:
         if not self.euler_circuit:
             return {}
         
-        stats = {
-            'total_edges': len(self.euler_circuit),
-            'total_distance': self.get_total_distance(),
-            'unique_edges': len(set(self.euler_circuit)),
-            'repeated_edges': len(self.euler_circuit) - len(set(self.euler_circuit))
-        }
+        # Calculate total distance using the augmented graph from postman_problems
+        total_distance = 0
+        edge_counts = {}
         
-        # Calculate coverage
+        # Use augmented graph if available for accurate distance
+        graph_to_use = self.augmented_graph if self.augmented_graph else self.graph
+        
+        for u, v in self.euler_circuit:
+            # Get edge data - try with original node IDs first, then strings
+            edge_length = 0
+            
+            # For augmented graph from postman_problems, node IDs might be strings
+            u_str, v_str = str(u), str(v)
+            
+            # Try original IDs first (for our graph), then string IDs (for augmented)
+            for u_try, v_try in [(u, v), (u_str, v_str)]:
+                if graph_to_use.has_edge(u_try, v_try):
+                    edge_data = graph_to_use[u_try][v_try]
+                    # Handle different edge data structures
+                    if isinstance(edge_data, dict):
+                        edge_length = edge_data.get('distance', edge_data.get('length', 0))
+                    else:
+                        # For MultiGraph, get the first edge
+                        for key in edge_data:
+                            edge_length = edge_data[key].get('distance', edge_data[key].get('length', 0))
+                            break
+                    break
+                elif graph_to_use.has_edge(v_try, u_try):
+                    edge_data = graph_to_use[v_try][u_try]
+                    if isinstance(edge_data, dict):
+                        edge_length = edge_data.get('distance', edge_data.get('length', 0))
+                    else:
+                        for key in edge_data:
+                            edge_length = edge_data[key].get('distance', edge_data[key].get('length', 0))
+                            break
+                    break
+            
+            total_distance += edge_length
+            
+            # Count edge traversals
+            edge_key = tuple(sorted([u, v]))
+            edge_counts[edge_key] = edge_counts.get(edge_key, 0) + 1
+        
+        # Count edges traversed more than once
+        repeated_edges = sum(1 for count in edge_counts.values() if count > 1)
+        total_repetitions = sum(count - 1 for count in edge_counts.values() if count > 1)
+        
+        # Calculate original graph stats for coverage
         original_edges = self.graph.number_of_edges()
-        stats['edge_coverage'] = len(set(self.euler_circuit)) / original_edges * 100
+        edge_coverage = (len(edge_counts) / original_edges * 100) if original_edges > 0 else 0
         
-        return stats
+        return {
+            'total_edges': len(self.euler_circuit),
+            'unique_edges': len(edge_counts),
+            'repeated_edges': repeated_edges,
+            'total_repetitions': total_repetitions,
+            'total_distance': round(total_distance, 2),  # Keep as total_distance for compatibility
+            'total_distance_m': round(total_distance, 2),
+            'total_distance_km': round(total_distance / 1000, 2),
+            'edge_coverage': round(edge_coverage, 1)
+        }

@@ -1,0 +1,39 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "StreetView Route",
+        "timestamp": "2025-08-10T00:12:43.530175",
+        "total_points": 5,
+        "total_edges": 11
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -122.2680638,
+            37.8703135
+          ],
+          [
+            -122.267783,
+            37.8703523
+          ],
+          [
+            -122.2677134,
+            37.8712486
+          ],
+          [
+            -122.2682891,
+            37.8711745
+          ],
+          [
+            -122.2678638,
+            37.8700158
+          ]
+        ]
+      }
+    }
+  ]
+}

@@ -55,7 +55,8 @@ class MapLoader:
             NetworkX MultiDiGraph representing the street network
         """
         logger.info(f"Loading street network for bbox: N={north}, S={south}, E={east}, W={west}")
-        graph = ox.graph_from_bbox(north, south, east, west, 
+        # OSMnx expects bbox as (west, south, east, north) - i.e., (left, bottom, right, top)
+        graph = ox.graph_from_bbox(bbox=(west, south, east, north), 
                                    network_type=self.network_type)
         return self._preprocess_graph(graph)
     

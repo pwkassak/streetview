@@ -1,0 +1,588 @@
+{
+  "config": {
+    "configFile": "/Users/kassak/Documents/Work/StreetView/streetview/web_app/tests/playwright.config.ts",
+    "rootDir": "/Users/kassak/Documents/Work/StreetView/streetview/web_app/tests/e2e",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        null
+      ],
+      [
+        "line",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/Users/kassak/Documents/Work/StreetView/streetview/web_app/tests/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/Users/kassak/Documents/Work/StreetView/streetview/web_app/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/Users/kassak/Documents/Work/StreetView/streetview/web_app/tests/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "debug",
+        "name": "debug",
+        "testDir": "/Users/kassak/Documents/Work/StreetView/streetview/web_app/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.54.2",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "route-planning.spec.ts",
+      "file": "route-planning.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Route Planning",
+          "file": "route-planning.spec.ts",
+          "line": 4,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should plan route for drawn rectangle in Berkeley",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 34267,
+                      "error": {
+                        "message": "TimeoutError: page.waitForResponse: Timeout 30000ms exceeded while waiting for event \"response\"",
+                        "stack": "TimeoutError: page.waitForResponse: Timeout 30000ms exceeded while waiting for event \"response\"\n    at /Users/kassak/Documents/Work/StreetView/streetview/web_app/tests/e2e/route-planning.spec.ts:43:34",
+                        "location": {
+                          "file": "/Users/kassak/Documents/Work/StreetView/streetview/web_app/tests/e2e/route-planning.spec.ts",
+                          "column": 34,
+                          "line": 43
+                        },
+                        "snippet": "  41 |     \n  42 |     // Set up promise to wait for API response\n> 43 |     const responsePromise = page.waitForResponse(\n     |                                  ^\n  44 |       response => response.url().includes('/api/plan-route'),\n  45 |       { timeout: 30000 }\n  46 |     );"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/kassak/Documents/Work/StreetView/streetview/web_app/tests/e2e/route-planning.spec.ts",
+                            "column": 34,
+                            "line": 43
+                          },
+                          "message": "TimeoutError: page.waitForResponse: Timeout 30000ms exceeded while waiting for event \"response\"\n\n  41 |     \n  42 |     // Set up promise to wait for API response\n> 43 |     const responsePromise = page.waitForResponse(\n     |                                  ^\n  44 |       response => response.url().includes('/api/plan-route'),\n  45 |       { timeout: 30000 }\n  46 |     );\n    at /Users/kassak/Documents/Work/StreetView/streetview/web_app/tests/e2e/route-planning.spec.ts:43:34"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "=== Starting Route Planning Test ===\n"
+                        },
+                        {
+                          "text": "1. Navigating to application...\n"
+                        },
+                        {
+                          "text": "2. Waiting for map to load...\n"
+                        },
+                        {
+                          "text": "Screenshot saved: debug/screenshot-map-loaded-2025-08-10T00-13-54-073Z.png\n"
+                        },
+                        {
+                          "text": "3. Verifying initial state...\n"
+                        },
+                        {
+                          "text": "4. Drawing rectangle on map...\n"
+                        },
+                        {
+                          "text": "Drawing rectangle from (800, 350) to (950, 450)\n"
+                        },
+                        {
+                          "text": "Screenshot saved: debug/screenshot-rectangle-drawn-2025-08-10T00-13-55-844Z.png\n"
+                        },
+                        {
+                          "text": "5. Verifying rectangle is visible...\n"
+                        },
+                        {
+                          "text": "6. Clicking Plan Route button...\n"
+                        },
+                        {
+                          "text": "API Request: {\n  url: \u001b[32m'http://localhost:3000/api/plan-route/bbox'\u001b[39m,\n  method: \u001b[32m'POST'\u001b[39m,\n  headers: {\n    \u001b[32m'sec-ch-ua-platform'\u001b[39m: \u001b[32m'\"Windows\"'\u001b[39m,\n    referer: \u001b[32m'http://localhost:3000/'\u001b[39m,\n    \u001b[32m'accept-language'\u001b[39m: \u001b[32m'en-US'\u001b[39m,\n    \u001b[32m'sec-ch-ua'\u001b[39m: \u001b[32m'\"Not;A=Brand\";v=\"99\", \"HeadlessChrome\";v=\"139\", \"Chromium\";v=\"139\"'\u001b[39m,\n    \u001b[32m'sec-ch-ua-mobile'\u001b[39m: \u001b[32m'?0'\u001b[39m,\n    \u001b[32m'user-agent'\u001b[39m: \u001b[32m'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.7258.5 Safari/537.36'\u001b[39m,\n    accept: \u001b[32m'application/json, text/plain, */*'\u001b[39m,\n    \u001b[32m'content-type'\u001b[39m: \u001b[32m'application/json'\u001b[39m\n  },\n  postData: \u001b[32m'{\"north\":37.897343212930416,\"south\":37.883795951524995,\"east\":-122.27439880371095,\"west\":-122.30014801025392,\"network_type\":\"drive\"}'\u001b[39m,\n  timestamp: \u001b[32m'2025-08-10T00:13:56.055Z'\u001b[39m\n}\n"
+                        },
+                        {
+                          "text": "Screenshot saved: debug/screenshot-plan-route-clicked-2025-08-10T00-13-56-056Z.png\n"
+                        },
+                        {
+                          "text": "7. Waiting for API response...\n"
+                        }
+                      ],
+                      "stderr": [
+                        {
+                          "text": "Browser Console Error: WebSocket error: Event\n"
+                        },
+                        {
+                          "text": "Browser Console Error: WebSocket connection to 'ws://localhost:8000/ws' failed: Error during WebSocket handshake: Unexpected response code: 404\n"
+                        },
+                        {
+                          "text": "Browser Console Error: WebSocket error: Event\n"
+                        }
+                      ],
+                      "retry": 0,
+                      "startTime": "2025-08-10T00:13:52.264Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/kassak/Documents/Work/StreetView/streetview/web_app/tests/test-results/route-planning-Route-Plann-77849-drawn-rectangle-in-Berkeley-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/kassak/Documents/Work/StreetView/streetview/web_app/tests/test-results/route-planning-Route-Plann-77849-drawn-rectangle-in-Berkeley-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/kassak/Documents/Work/StreetView/streetview/web_app/tests/test-results/route-planning-Route-Plann-77849-drawn-rectangle-in-Berkeley-chromium/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/kassak/Documents/Work/StreetView/streetview/web_app/tests/e2e/route-planning.spec.ts",
+                        "column": 34,
+                        "line": 43
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "4de9a3588d51e1695557-0aa1e7b9269d81cd3b8d",
+              "file": "route-planning.spec.ts",
+              "line": 5,
+              "column": 7
+            },
+            {
+              "title": "should handle place name search",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2413,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "=== Testing Place Name Search ===\n"
+                        },
+                        {
+                          "text": "API Request: {\n  url: \u001b[32m'http://localhost:3000/api/plan-route/place'\u001b[39m,\n  method: \u001b[32m'POST'\u001b[39m,\n  headers: {\n    \u001b[32m'sec-ch-ua-platform'\u001b[39m: \u001b[32m'\"Windows\"'\u001b[39m,\n    referer: \u001b[32m'http://localhost:3000/'\u001b[39m,\n    \u001b[32m'accept-language'\u001b[39m: \u001b[32m'en-US'\u001b[39m,\n    \u001b[32m'sec-ch-ua'\u001b[39m: \u001b[32m'\"Not;A=Brand\";v=\"99\", \"HeadlessChrome\";v=\"139\", \"Chromium\";v=\"139\"'\u001b[39m,\n    \u001b[32m'sec-ch-ua-mobile'\u001b[39m: \u001b[32m'?0'\u001b[39m,\n    \u001b[32m'user-agent'\u001b[39m: \u001b[32m'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.7258.5 Safari/537.36'\u001b[39m,\n    accept: \u001b[32m'application/json, text/plain, */*'\u001b[39m,\n    \u001b[32m'content-type'\u001b[39m: \u001b[32m'application/json'\u001b[39m\n  },\n  postData: \u001b[32m'{\"place_name\":\"Berkeley, California, USA\",\"network_type\":\"drive\"}'\u001b[39m,\n  timestamp: \u001b[32m'2025-08-10T00:14:27.687Z'\u001b[39m\n}\n"
+                        },
+                        {
+                          "text": "Place search response: 200\n"
+                        },
+                        {
+                          "text": "API Response: {\n  url: \u001b[32m'http://localhost:3000/api/plan-route/place'\u001b[39m,\n  status: \u001b[33m200\u001b[39m,\n  statusText: \u001b[32m'OK'\u001b[39m\n}\n"
+                        }
+                      ],
+                      "stderr": [
+                        {
+                          "text": "Browser Console Error: WebSocket error: Event\n"
+                        },
+                        {
+                          "text": "Browser Console Error: WebSocket connection to 'ws://localhost:8000/ws' failed: Error during WebSocket handshake: Unexpected response code: 404\n"
+                        },
+                        {
+                          "text": "Browser Console Error: WebSocket error: Event\n"
+                        }
+                      ],
+                      "retry": 0,
+                      "startTime": "2025-08-10T00:14:27.158Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "4de9a3588d51e1695557-cf18bcb18c8bc79c2451",
+              "file": "route-planning.spec.ts",
+              "line": 98,
+              "column": 7
+            },
+            {
+              "title": "should clear drawings",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3549,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "Drawing rectangle from (350, 350) to (550, 450)\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-10T00:14:29.810Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "4de9a3588d51e1695557-700335a7a22c8ba8f1a0",
+              "file": "route-planning.spec.ts",
+              "line": 130,
+              "column": 7
+            },
+            {
+              "title": "should plan route for drawn rectangle in Berkeley",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "debug",
+                  "projectName": "debug",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 36359,
+                      "error": {
+                        "message": "TimeoutError: page.waitForResponse: Timeout 30000ms exceeded while waiting for event \"response\"",
+                        "stack": "TimeoutError: page.waitForResponse: Timeout 30000ms exceeded while waiting for event \"response\"\n    at /Users/kassak/Documents/Work/StreetView/streetview/web_app/tests/e2e/route-planning.spec.ts:43:34",
+                        "location": {
+                          "file": "/Users/kassak/Documents/Work/StreetView/streetview/web_app/tests/e2e/route-planning.spec.ts",
+                          "column": 34,
+                          "line": 43
+                        },
+                        "snippet": "  41 |     \n  42 |     // Set up promise to wait for API response\n> 43 |     const responsePromise = page.waitForResponse(\n     |                                  ^\n  44 |       response => response.url().includes('/api/plan-route'),\n  45 |       { timeout: 30000 }\n  46 |     );"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/kassak/Documents/Work/StreetView/streetview/web_app/tests/e2e/route-planning.spec.ts",
+                            "column": 34,
+                            "line": 43
+                          },
+                          "message": "TimeoutError: page.waitForResponse: Timeout 30000ms exceeded while waiting for event \"response\"\n\n  41 |     \n  42 |     // Set up promise to wait for API response\n> 43 |     const responsePromise = page.waitForResponse(\n     |                                  ^\n  44 |       response => response.url().includes('/api/plan-route'),\n  45 |       { timeout: 30000 }\n  46 |     );\n    at /Users/kassak/Documents/Work/StreetView/streetview/web_app/tests/e2e/route-planning.spec.ts:43:34"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "=== Starting Route Planning Test ===\n"
+                        },
+                        {
+                          "text": "1. Navigating to application...\n"
+                        },
+                        {
+                          "text": "2. Waiting for map to load...\n"
+                        },
+                        {
+                          "text": "Screenshot saved: debug/screenshot-map-loaded-2025-08-10T00-14-36-385Z.png\n"
+                        },
+                        {
+                          "text": "3. Verifying initial state...\n"
+                        },
+                        {
+                          "text": "4. Drawing rectangle on map...\n"
+                        },
+                        {
+                          "text": "Drawing rectangle from (800, 350) to (950, 450)\n"
+                        },
+                        {
+                          "text": "Screenshot saved: debug/screenshot-rectangle-drawn-2025-08-10T00-14-39-674Z.png\n"
+                        },
+                        {
+                          "text": "5. Verifying rectangle is visible...\n"
+                        },
+                        {
+                          "text": "6. Clicking Plan Route button...\n"
+                        },
+                        {
+                          "text": "API Request: {\n  url: \u001b[32m'http://localhost:3000/api/plan-route/bbox'\u001b[39m,\n  method: \u001b[32m'POST'\u001b[39m,\n  headers: {\n    \u001b[32m'sec-ch-ua-platform'\u001b[39m: \u001b[32m'\"Windows\"'\u001b[39m,\n    referer: \u001b[32m'http://localhost:3000/'\u001b[39m,\n    \u001b[32m'accept-language'\u001b[39m: \u001b[32m'en-US'\u001b[39m,\n    \u001b[32m'sec-ch-ua'\u001b[39m: \u001b[32m'\"Chromium\";v=\"139\", \"Not;A=Brand\";v=\"99\"'\u001b[39m,\n    \u001b[32m'sec-ch-ua-mobile'\u001b[39m: \u001b[32m'?0'\u001b[39m,\n    \u001b[32m'user-agent'\u001b[39m: \u001b[32m'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.7258.5 Safari/537.36'\u001b[39m,\n    accept: \u001b[32m'application/json, text/plain, */*'\u001b[39m,\n    \u001b[32m'content-type'\u001b[39m: \u001b[32m'application/json'\u001b[39m\n  },\n  postData: \u001b[32m'{\"north\":37.897343212930416,\"south\":37.883795951524995,\"east\":-122.27439880371095,\"west\":-122.30014801025392,\"network_type\":\"drive\"}'\u001b[39m,\n  timestamp: \u001b[32m'2025-08-10T00:14:39.867Z'\u001b[39m\n}\n"
+                        },
+                        {
+                          "text": "Screenshot saved: debug/screenshot-plan-route-clicked-2025-08-10T00-14-40-372Z.png\n"
+                        },
+                        {
+                          "text": "7. Waiting for API response...\n"
+                        }
+                      ],
+                      "stderr": [
+                        {
+                          "text": "Browser Console Error: WebSocket error: Event\n"
+                        },
+                        {
+                          "text": "Browser Console Error: Failed to load resource: the server responded with a status of 404 (Not Found)\n"
+                        },
+                        {
+                          "text": "Browser Console Error: WebSocket connection to 'ws://localhost:8000/ws' failed: Error during WebSocket handshake: Unexpected response code: 404\n"
+                        },
+                        {
+                          "text": "Browser Console Error: WebSocket error: Event\n"
+                        }
+                      ],
+                      "retry": 0,
+                      "startTime": "2025-08-10T00:14:33.592Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/kassak/Documents/Work/StreetView/streetview/web_app/tests/test-results/route-planning-Route-Plann-77849-drawn-rectangle-in-Berkeley-debug/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/kassak/Documents/Work/StreetView/streetview/web_app/tests/test-results/route-planning-Route-Plann-77849-drawn-rectangle-in-Berkeley-debug/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/kassak/Documents/Work/StreetView/streetview/web_app/tests/test-results/route-planning-Route-Plann-77849-drawn-rectangle-in-Berkeley-debug/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/kassak/Documents/Work/StreetView/streetview/web_app/tests/test-results/route-planning-Route-Plann-77849-drawn-rectangle-in-Berkeley-debug/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/kassak/Documents/Work/StreetView/streetview/web_app/tests/e2e/route-planning.spec.ts",
+                        "column": 34,
+                        "line": 43
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "4de9a3588d51e1695557-bed6b69d4bdfedc8cf74",
+              "file": "route-planning.spec.ts",
+              "line": 5,
+              "column": 7
+            },
+            {
+              "title": "should handle place name search",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "debug",
+                  "projectName": "debug",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3690,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "=== Testing Place Name Search ===\n"
+                        },
+                        {
+                          "text": "API Request: {\n  url: \u001b[32m'http://localhost:3000/api/plan-route/place'\u001b[39m,\n  method: \u001b[32m'POST'\u001b[39m,\n  headers: {\n    \u001b[32m'sec-ch-ua-platform'\u001b[39m: \u001b[32m'\"Windows\"'\u001b[39m,\n    referer: \u001b[32m'http://localhost:3000/'\u001b[39m,\n    \u001b[32m'accept-language'\u001b[39m: \u001b[32m'en-US'\u001b[39m,\n    \u001b[32m'sec-ch-ua'\u001b[39m: \u001b[32m'\"Chromium\";v=\"139\", \"Not;A=Brand\";v=\"99\"'\u001b[39m,\n    \u001b[32m'sec-ch-ua-mobile'\u001b[39m: \u001b[32m'?0'\u001b[39m,\n    \u001b[32m'user-agent'\u001b[39m: \u001b[32m'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.7258.5 Safari/537.36'\u001b[39m,\n    accept: \u001b[32m'application/json, text/plain, */*'\u001b[39m,\n    \u001b[32m'content-type'\u001b[39m: \u001b[32m'application/json'\u001b[39m\n  },\n  postData: \u001b[32m'{\"place_name\":\"Berkeley, California, USA\",\"network_type\":\"drive\"}'\u001b[39m,\n  timestamp: \u001b[32m'2025-08-10T00:15:12.770Z'\u001b[39m\n}\n"
+                        },
+                        {
+                          "text": "Place search response: 200\n"
+                        },
+                        {
+                          "text": "API Response: {\n  url: \u001b[32m'http://localhost:3000/api/plan-route/place'\u001b[39m,\n  status: \u001b[33m200\u001b[39m,\n  statusText: \u001b[32m'OK'\u001b[39m\n}\n"
+                        }
+                      ],
+                      "stderr": [
+                        {
+                          "text": "Browser Console Error: WebSocket error: Event\n"
+                        },
+                        {
+                          "text": "Browser Console Error: Failed to load resource: the server responded with a status of 404 (Not Found)\n"
+                        },
+                        {
+                          "text": "Browser Console Error: WebSocket connection to 'ws://localhost:8000/ws' failed: Error during WebSocket handshake: Unexpected response code: 404\n"
+                        },
+                        {
+                          "text": "Browser Console Error: WebSocket error: Event\n"
+                        }
+                      ],
+                      "retry": 0,
+                      "startTime": "2025-08-10T00:15:10.945Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/kassak/Documents/Work/StreetView/streetview/web_app/tests/test-results/route-planning-Route-Plann-a0d59-ld-handle-place-name-search-debug/test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/kassak/Documents/Work/StreetView/streetview/web_app/tests/test-results/route-planning-Route-Plann-a0d59-ld-handle-place-name-search-debug/video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/kassak/Documents/Work/StreetView/streetview/web_app/tests/test-results/route-planning-Route-Plann-a0d59-ld-handle-place-name-search-debug/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "4de9a3588d51e1695557-02111c4f29b1782c94a9",
+              "file": "route-planning.spec.ts",
+              "line": 98,
+              "column": 7
+            },
+            {
+              "title": "should clear drawings",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "debug",
+                  "projectName": "debug",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6349,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "Drawing rectangle from (350, 350) to (550, 450)\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-10T00:15:15.050Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/kassak/Documents/Work/StreetView/streetview/web_app/tests/test-results/route-planning-Route-Planning-should-clear-drawings-debug/test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/kassak/Documents/Work/StreetView/streetview/web_app/tests/test-results/route-planning-Route-Planning-should-clear-drawings-debug/video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/kassak/Documents/Work/StreetView/streetview/web_app/tests/test-results/route-planning-Route-Planning-should-clear-drawings-debug/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "4de9a3588d51e1695557-443697407958c27393ac",
+              "file": "route-planning.spec.ts",
+              "line": 130,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-08-10T00:13:52.014Z",
+    "duration": 89573.79299999999,
+    "expected": 4,
+    "skipped": 0,
+    "unexpected": 2,
+    "flaky": 0
+  }
+}
