@@ -205,3 +205,21 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# OSMnx cache files
+planning/cache/
+web_app/backend/cache/
+
+# Route planning output files
+web_app/backend/output/
+
+# Backend logs
+web_app/backend/logs/
+
+# Frontend build and dependencies
+web_app/frontend/node_modules/
+web_app/frontend/dist/
+web_app/frontend/.vite/
+
+# macOS system files
+.DS_Store
