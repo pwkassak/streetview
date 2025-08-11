@@ -76,6 +76,11 @@ class RouteAPI {
     return response.data;
   }
 
+  async getRouteSegments(routeId: string): Promise<any> {
+    const response = await axios.get(`${API_BASE_URL}/route/${routeId}/segments`);
+    return response.data;
+  }
+
   async exportRoute(routeId: string, format: string): Promise<void> {
     const response = await axios.get(`${API_BASE_URL}/export/${routeId}/${format}`, {
       responseType: 'blob',
