@@ -15,6 +15,9 @@ L.Icon.Default.mergeOptions({
 interface MapViewProps {
   onRegionSelect: (region: any) => void;
   routeData?: any;
+  routeSegments?: any;
+  currentSegment?: number;
+  showFullRoute?: boolean;
   center?: [number, number];
   zoom?: number;
 }
@@ -118,6 +121,9 @@ const DrawingHandler: React.FC<{
 const MapView: React.FC<MapViewProps> = ({ 
   onRegionSelect, 
   routeData,
+  routeSegments,
+  currentSegment = -1,
+  showFullRoute = true,
   center = [42.3360, -71.2092], // Default to Newton, MA
   zoom = 13 
 }) => {
@@ -164,7 +170,108 @@ const MapView: React.FC<MapViewProps> = ({
     setDrawingMode('none');
   }, []);
 
+  const getTraversalColor = (traversalNumber: number) => {
+    switch(traversalNumber) {
+      case 1: return '#0066CC'; // Blue for first pass
+      case 2: return '#FF9500'; // Orange for second pass
+      default: return '#FF3B30'; // Red for third+ pass
+    }
+  };
+
+  // Could be used with a custom Leaflet extension for offset
+  // const getTraversalOffset = (traversalNumber: number) => {
+  //   // Offset repeated traversals slightly to prevent obscuring
+  //   return (traversalNumber - 1) * 3; // 3 pixels offset per traversal
+  // };
+
   const renderRoute = () => {
+    // Render segmented route if available
+    if (routeSegments?.features && currentSegment >= 0) {
+      const segmentsToRender = showFullRoute 
+        ? routeSegments.features 
+        : routeSegments.features.slice(0, currentSegment + 1);
+      
+      return (
+        <>
+          {segmentsToRender.map((feature: any, idx: number) => {
+            const coordinates = feature.geometry.coordinates;
+            const positions: [number, number][] = coordinates.map((coord: number[]) => [coord[1], coord[0]]);
+            const traversalNumber = feature.properties.traversal_number || 1;
+            const isCurrentSegment = idx === currentSegment;
+            
+            return (
+              <Polyline
+                key={`segment-${idx}`}
+                positions={positions}
+                pathOptions={{
+                  color: getTraversalColor(traversalNumber),
+                  weight: isCurrentSegment ? 5 : 3,
+                  opacity: isCurrentSegment ? 1 : 0.7,
+                  dashArray: traversalNumber > 1 ? '10, 5' : undefined
+                  // Note: offset would be ideal here but isn't in Leaflet types
+                }}
+              >
+                <Popup>
+                  <div>
+                    <strong>Segment {idx + 1}</strong><br/>
+                    Pass #{traversalNumber}<br/>
+                    {feature.properties.street_name && `Street: ${feature.properties.street_name}`}
+                  </div>
+                </Popup>
+              </Polyline>
+            );
+          })}
+          
+          {/* Add start and end markers */}
+          {segmentsToRender.length > 0 && (
+            <>
+              {(() => {
+                const firstSegment = segmentsToRender[0];
+                const firstCoord = firstSegment.geometry.coordinates[0];
+                return (
+                  <Marker position={[firstCoord[1], firstCoord[0]]}>
+                    <Popup>Start Point</Popup>
+                  </Marker>
+                );
+              })()}
+              
+              {showFullRoute && (() => {
+                const lastSegment = segmentsToRender[segmentsToRender.length - 1];
+                const lastCoords = lastSegment.geometry.coordinates;
+                const lastCoord = lastCoords[lastCoords.length - 1];
+                return (
+                  <Marker position={[lastCoord[1], lastCoord[0]]}>
+                    <Popup>End Point</Popup>
+                  </Marker>
+                );
+              })()}
+              
+              {/* Current position marker when playing */}
+              {!showFullRoute && currentSegment >= 0 && currentSegment < segmentsToRender.length && (() => {
+                const currentSeg = segmentsToRender[currentSegment];
+                const coords = currentSeg.geometry.coordinates;
+                const lastCoord = coords[coords.length - 1];
+                return (
+                  <Circle
+                    center={[lastCoord[1], lastCoord[0]]}
+                    radius={20}
+                    pathOptions={{
+                      color: '#00FF00',
+                      fillColor: '#00FF00',
+                      fillOpacity: 0.8
+                    }}
+                  >
+                    <Popup>Current Position</Popup>
+                  </Circle>
+                );
+              })()}
+            </>
+          )}
+        </>
+      );
+    }
+    
+    // Fallback to simple route rendering
     if (!routeData?.geojson?.features?.[0]?.geometry?.coordinates) {
       return null;
     }

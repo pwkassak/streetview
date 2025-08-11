@@ -163,7 +163,8 @@ class RouteExporter:
     
     def export_to_geojson(self, route: List[Tuple[int, int]], 
                           output_file: str,
-                          route_name: str = "StreetView Route") -> None:
+                          route_name: str = "StreetView Route",
+                          include_segments: bool = False) -> None:
         """
         Export route to GeoJSON format with street geometry.
         
@@ -171,6 +172,7 @@ class RouteExporter:
             route: List of edge tuples (node_from, node_to)
             output_file: Path to output GeoJSON file
             route_name: Name for the route
+            include_segments: If True, export as separate segments with traversal metadata
         """
         logger.info(f"Exporting route to GeoJSON: {output_file}")
         
@@ -182,11 +184,24 @@ class RouteExporter:
             transformer = Transformer.from_crs(crs, 'EPSG:4326', always_xy=True)
             logger.info(f"Graph is projected ({crs}), will transform coordinates to lat/lon")
         
+        # Track edge traversals for segment analysis
+        edge_traversals = {}  # (u, v) -> [traversal_indices]
+        segments = []  # List of segments with metadata
+        
         # Build coordinate list using street geometry
         coordinates = []
         last_node = None
         
-        for u, v in route:
+        for idx, (u, v) in enumerate(route):
+            # Track traversals
+            edge_key = (min(u, v), max(u, v))  # Normalize edge direction
+            if edge_key not in edge_traversals:
+                edge_traversals[edge_key] = []
+            edge_traversals[edge_key].append(idx)
+            traversal_count = len(edge_traversals[edge_key])
+            
+            # Store segment coordinates
+            segment_coords = []
             # Try to get edge geometry for actual street path
             if self.graph.has_edge(u, v):
                 edge_data = self.graph[u][v]
@@ -224,7 +239,29 @@ class RouteExporter:
                         
                         # Add all points from the geometry
                         for lon, lat in edge_coords:
-                            coordinates.append([lon, lat])
+                            coord = [lon, lat]
+                            coordinates.append(coord)
+                            segment_coords.append(coord)
+                        
+                        # Add segment metadata if requested
+                        if include_segments and segment_coords:
+                            segment_data = {
+                                'index': idx,
+                                'from_node': u,
+                                'to_node': v,
+                                'traversal_number': traversal_count,
+                                'edge_key': f"{edge_key[0]}_{edge_key[1]}",
+                                'coordinates': segment_coords[:]
+                            }
+                            # Get street name if available
+                            if isinstance(edge_data, dict):
+                                segment_data['street_name'] = edge_data.get('name', '')
+                            else:
+                                for key in edge_data:
+                                    if 'name' in edge_data[key]:
+                                        segment_data['street_name'] = edge_data[key]['name']
+                                        break
+                            segments.append(segment_data)
                         continue
                     except Exception as e:
                         logger.debug(f"Could not extract geometry for edge {u}->{v}: {e}")
@@ -238,13 +275,17 @@ class RouteExporter:
                     y = node_data.get('y')
                     if x is not None and y is not None:
                         lon, lat = transformer.transform(x, y)
-                        coordinates.append([lon, lat])
+                        coord = [lon, lat]
+                        coordinates.append(coord)
+                        segment_coords.append(coord)
                 else:
                     # Graph is not projected, use lat/lon directly
                     lat = node_data.get('lat', node_data.get('y'))
                     lon = node_data.get('lon', node_data.get('x'))
                     if lat and lon:
-                        coordinates.append([lon, lat])
+                        coord = [lon, lat]
+                        coordinates.append(coord)
+                        segment_coords.append(coord)
             
             node_data = self.graph.nodes[v]
             if transformer:
@@ -253,35 +294,85 @@ class RouteExporter:
                 y = node_data.get('y')
                 if x is not None and y is not None:
                     lon, lat = transformer.transform(x, y)
-                    coordinates.append([lon, lat])
+                    coord = [lon, lat]
+                    coordinates.append(coord)
+                    segment_coords.append(coord)
             else:
                 # Graph is not projected, use lat/lon directly
                 lat = node_data.get('lat', node_data.get('y'))
                 lon = node_data.get('lon', node_data.get('x'))
                 if lat and lon:
-                    coordinates.append([lon, lat])
+                    coord = [lon, lat]
+                    coordinates.append(coord)
+                    segment_coords.append(coord)
+            
+            # Add segment for fallback case
+            if include_segments and segment_coords:
+                segments.append({
+                    'index': idx,
+                    'from_node': u,
+                    'to_node': v,
+                    'traversal_number': traversal_count,
+                    'edge_key': f"{edge_key[0]}_{edge_key[1]}",
+                    'coordinates': segment_coords[:],
+                    'street_name': ''
+                })
             
             last_node = v
         
         # Create GeoJSON structure
-        geojson = {
-            "type": "FeatureCollection",
-            "features": [
-                {
+        if include_segments:
+            # Export as separate segments
+            features = []
+            for segment in segments:
+                features.append({
                     "type": "Feature",
                     "properties": {
-                        "name": route_name,
-                        "timestamp": datetime.now().isoformat(),
-                        "total_points": len(coordinates),
-                        "total_edges": len(route)
+                        "segment_index": segment['index'],
+                        "from_node": segment['from_node'],
+                        "to_node": segment['to_node'],
+                        "traversal_number": segment['traversal_number'],
+                        "edge_key": segment['edge_key'],
+                        "street_name": segment.get('street_name', '')
                     },
                     "geometry": {
                         "type": "LineString",
-                        "coordinates": coordinates
+                        "coordinates": segment['coordinates']
                     }
-                }
-            ]
-        }
+                })
+            
+            geojson = {
+                "type": "FeatureCollection",
+                "properties": {
+                    "name": route_name,
+                    "timestamp": datetime.now().isoformat(),
+                    "total_segments": len(segments),
+                    "total_edges": len(route),
+                    "unique_edges": len(edge_traversals),
+                    "max_traversals": max(len(traversals) for traversals in edge_traversals.values()) if edge_traversals else 0
+                },
+                "features": features
+            }
+        else:
+            # Export as single line (existing behavior)
+            geojson = {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                        "type": "Feature",
+                        "properties": {
+                            "name": route_name,
+                            "timestamp": datetime.now().isoformat(),
+                            "total_points": len(coordinates),
+                            "total_edges": len(route)
+                        },
+                        "geometry": {
+                            "type": "LineString",
+                            "coordinates": coordinates
+                        }
+                    }
+                ]
+            }
         
         # Write to file
         with open(output_file, 'w') as f:

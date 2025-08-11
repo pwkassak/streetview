@@ -217,6 +217,42 @@ async def get_route(route_id: str):
     )
 
 
+@app.get("/api/route/{route_id}/segments")
+async def get_route_segments(route_id: str):
+    """
+    Get route segments with traversal metadata.
+    """
+    import tempfile
+    
+    route = route_service.get_route(route_id)
+    if not route:
+        raise HTTPException(status_code=404, detail="Route not found")
+    
+    # Get the planner and generate segmented GeoJSON
+    planner = route.get('planner')
+    if not planner or not planner.route:
+        raise HTTPException(status_code=400, detail="Route not yet planned")
+    
+    # Generate segmented GeoJSON to a temp file
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.geojson', delete=False) as tmp:
+        tmp_path = tmp.name
+        planner.exporter.export_to_geojson(
+            planner.route, 
+            tmp_path,
+            route_name="StreetView Route",
+            include_segments=True
+        )
+    
+    # Read and return the segmented data
+    with open(tmp_path, 'r') as f:
+        segments_data = json.load(f)
+    
+    # Clean up temp file
+    os.unlink(tmp_path)
+    
+    return segments_data
+
+
 @app.get("/api/export/{route_id}/{format}")
 async def export_route(route_id: str, format: str):
     """Export route to specified format."""
